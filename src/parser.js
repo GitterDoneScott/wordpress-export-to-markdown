@@ -5,6 +5,7 @@ const xml2js = require('xml2js');
 const shared = require('./shared');
 const settings = require('./settings');
 const translator = require('./translator');
+const { watch } = require('fs/promises');
 
 async function parseFilePromise(config) {
 	console.log('\nParsing...');
@@ -12,7 +13,7 @@ async function parseFilePromise(config) {
 	const data = await xml2js.parseStringPromise(content, {
 		trim: true,
 		tagNameProcessors: [xml2js.processors.stripPrefix]
-	});
+		});
 
 	const postTypes = getPostTypes(data, config);
 	const posts = collectPosts(data, postTypes, config);
@@ -69,7 +70,9 @@ function collectPosts(data, postTypes, config) {
 					title: getPostTitle(post),
 					date: getPostDate(post),
 					categories: getCategories(post),
-					tags: getTags(post)
+					tags: getTags(post),
+					type: postType
+                    
 				},
 				content: translator.getPostContent(post, turndownService, config)
 			}));
@@ -143,13 +146,13 @@ function processCategoryTags(post, domain) {
 function collectAttachedImages(data) {
 	const images = getItemsOfType(data, 'attachment')
 		// filter to certain image file types
-		.filter(attachment => (/\.(gif|jpe?g|png)$/i).test(attachment.attachment_url[0]))
+		.filter(attachment => (/\.(gif|jpe?g|png)$/i).test(attachment.guid[0]._))
 		.map(attachment => ({
 			id: attachment.post_id[0],
 			postId: attachment.post_parent[0],
-			url: attachment.attachment_url[0]
+			url: attachment.guid[0]._,
 		}));
-
+    // console.log([...images.entries()]);
 	console.log(images.length + ' attached images found.');
 	return images;
 }
@@ -192,7 +195,8 @@ function mergeImagesIntoPosts(images, posts) {
 			// this image was set as the featured image for this post
 			if (image.id === post.meta.coverImageId) {
 				shouldAttach = true;
-				post.frontmatter.coverImage = shared.getFilenameFromUrl(image.url);
+				//post.frontmatter.coverImage = shared.getFilenameFromUrl(image.url);
+				post.frontmatter.image = image.url;
 			}
 
 			if (shouldAttach && !post.meta.imageUrls.includes(image.url)) {
