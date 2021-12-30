@@ -32,7 +32,7 @@ const options = [
 		aliases: ['yearfolders', 'yearmonthfolders'],
 		type: 'boolean',
 		description: 'Create year folders',
-		default: false
+		default: true
 	},
 	{
 		name: 'month-folders',
@@ -67,13 +67,13 @@ const options = [
 		aliases: ['addcontentimages'],
 		type: 'boolean',
 		description: 'Save images scraped from post body content',
-		default: true
+		default: false
 	},
 	{
 		name: 'include-other-types',
 		type: 'boolean',
 		description: 'Include custom post types and pages',
-		default: false
+		default: true,
 	}
 ];
 
