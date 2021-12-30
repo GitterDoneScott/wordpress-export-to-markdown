@@ -69,6 +69,7 @@ function getPostContent(post, turndownService, config) {
 		// folder so update references in post content to match
 		content = content.replace(/(<img[^>]*src=").*?([^/"]+\.(?:gif|jpe?g|png))("[^>]*>)/gi, '$1images/$2$3');
 	}
+ 
 
 	// this is a hack to make <iframe> nodes non-empty by inserting a "." which
 	// allows the iframe rule declared in initTurndownService() to take effect
@@ -78,6 +79,13 @@ function getPostContent(post, turndownService, config) {
 	// use turndown to convert HTML to Markdown
 	content = turndownService.turndown(content);
 
+    //convert thumbnail image links with full image inline reference
+	//[![IMG_3510](/wp-content/uploads/2011/07/IMG_3510.jpg "IMG_3510")](/wp-content/uploads/2011/07/IMG_3510.jpg)
+	//to ![](/wp-content/uploads/2011/07/IMG_3510.jpg)
+	// regex: /\[?(!)(\[[^\]\[]*\[?[^\]\[]*\]?[^\]\[]*)\]\(([^\s]+?)(?:\s+(["'])(.*?)\4)?\)/g
+	content = content.replace(/\[?(!)(\[[^\]\[]*\[?[^\]\[]*\]?[^\]\[]*)\]\(([^\s]+?)(?:\s+(["'])(.*?)\4)?\)/gi, '$1[]($3)');
+
+	
 	// clean up extra spaces in list items
 	content = content.replace(/(-|\d+\.) +/g, '$1 ');
 
